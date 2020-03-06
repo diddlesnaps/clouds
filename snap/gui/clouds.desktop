@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Clouds Windows 10 VM
+Exec=clouds %U
+Terminal=true
+Type=Application
+Icon=${SNAP}/meta/gui/clouds.png
+StartupWMClass=clouds
+Comment=Download and install Windows 10 in a VM

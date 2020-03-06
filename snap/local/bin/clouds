@@ -1,0 +1,45 @@
+#!/bin/bash
+# closing-doors
+
+echo "*** Checking for kvm interface connection"
+if snapctl is-connected kvm; then
+  echo "INFO: kvm interface is connected"
+else
+  echo "ERROR: kvm interface is not connected. Run 'sudo snap connect sosumi:kvm' then re-launch sosumi."
+  exit 1
+fi
+
+echo "*** Checking for Windows Installer ISO"
+if [ ! -f "$SNAP_USER_COMMON"/windows-installer.iso ]; then
+	URL="$(node $SNAP/index.js)"
+	RV=$?
+	echo "Download URL=$URL"
+	if [ $RV = 0 ] && [ -n "$URL" ]; then
+		wget "${URL}" -O "$SNAP_USER_COMMON"/windows-installer.iso -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | \
+		perl -p -e '$| = 1; s/^.* +([0-9]+%) +([0-9,.]+[GMKB]) +([0-9hms,.]+).*$/\1\n# Downloading Windows ISO image... \2 (\3)/' | \
+		yad --progress --title="Windows ISO Image" --width=400 --center --no-buttons --auto-close --auto-kill --on-top --no-escape
+
+		if [ $? != 0 ]; then
+			echo "Failed to download Windows ISO image"
+			exit 1
+		fi
+	else
+		echo "Failed to get download URL"
+		exit 1
+	fi
+fi
+
+echo "*** Checking for System Disk Image"
+if [ ! -f "$SNAP_USER_COMMON"/windows-system.qcow2 ]; then
+	qemu-img create -f qcow2 "$SNAP_USER_COMMON"/windows-system.qcow2 64G
+fi
+
+echo "*** Checking for launch script"
+if [ ! -f "$SNAP_USER_COMMON/launch" ]; then
+    cp -a "$SNAP"/bin/launch "$SNAP_USER_COMMON"/launch
+fi
+
+
+#qemu-virgil -enable-kvm -m 512 -device virtio-vga,virgl=on -display sdl,gl=on \ -netdev user,id=ethernet.0,hostfwd=tcp::10022-:22 -device rtl8139,netdev=ethernet.0 \ -soundhw ac97 some.img
+echo "*** Launch!"
+exec "$SNAP_USER_COMMON"/launch

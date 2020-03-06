@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<unattend xmlns="urn:schemas-microsoft-com:unattend"
+  xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <!--
+       For documentation on components:
+       http://technet.microsoft.com/en-us/library/ff699038.aspx
+  -->
+
+  <settings pass="generalize">
+    <!--
+         The PersistAllDeviceInstalls setting indicates whether all plug and
+         play devices on the destination computer remain installed during the
+         generalize configuration pass.
+    -->
+    <component name="Microsoft-Windows-PnPSysprep"
+      processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35"
+      language="neutral"
+      versionScope="nonSxS">
+      <PersistAllDeviceInstalls>true</PersistAllDeviceInstalls>
+    </component>
+  </settings>
+
+  <settings pass="windowsPE">
+    <component name="Microsoft-Windows-Setup" processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <DiskConfiguration>
+        <Disk wcm:action="add">
+          <DiskID>0</DiskID>
+          <WillWipeDisk>true</WillWipeDisk>
+          <CreatePartitions>
+            <CreatePartition wcm:action="add">
+              <Order>1</Order>
+              <Size>450</Size>
+              <Type>Primary</Type>
+            </CreatePartition>
+            <CreatePartition wcm:action="add">
+              <Extend>true</Extend>
+              <Order>2</Order>
+              <Type>Primary</Type>
+            </CreatePartition>
+          </CreatePartitions>
+          <ModifyPartitions>
+            <ModifyPartition wcm:action="add">
+              <Active>true</Active>
+              <Format>NTFS</Format>
+              <Label>System</Label>
+              <Order>1</Order>
+              <PartitionID>1</PartitionID>
+            </ModifyPartition>
+            <ModifyPartition wcm:action="add">
+              <Format>NTFS</Format>
+              <Label>Windows</Label>
+              <Letter>C</Letter>
+              <Order>2</Order>
+              <PartitionID>2</PartitionID>
+            </ModifyPartition>
+          </ModifyPartitions>
+        </Disk>
+        <WillShowUI>OnError</WillShowUI>
+      </DiskConfiguration>
+      <ImageInstall>
+        <OSImage>
+          <InstallTo>
+            <DiskID>0</DiskID>
+            <PartitionID>2</PartitionID>
+          </InstallTo>
+        </OSImage>
+      </ImageInstall>
+      <UserData>
+        <AcceptEula>false</AcceptEula>
+        <ProductKey>
+          <WillShowUI>Always</WillShowUI>
+        </ProductKey>
+      </UserData>
+    </component>
+
+    <component name="Microsoft-Windows-PnpCustomizationsWinPE"
+      publicKeyToken="31bf3856ad364e35" language="neutral"
+      versionScope="nonSxS" processorArchitecture="amd64">
+
+      <!--
+           This makes the VirtIO drivers available to Windows, assuming that
+           the VirtIO driver disk
+           (https://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/bin/)
+           is available as drive D:
+      -->
+      <DriverPaths>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="1">
+          <Path>E:\amd64\w10</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="2">
+          <Path>E:\viorng\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="3">
+          <Path>E:\NetKVM\w10\amd64</Path>
+        </PathAndCredentials>
+      </DriverPaths>
+    </component>
+  </settings>
+
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <OEMInformation>
+        <Manufacturer>Snapcrafters</Manufacturer>
+        <Model>SnapVM</Model>
+        <SupportHours>24/7</SupportHours>
+        <SupportPhone></SupportPhone>
+        <SupportProvider>Snapcrafters</SupportProvider>
+        <SupportURL>https://github.com/diddlesnaps/clouds/issues</SupportURL>
+      </OEMInformation>
+      <OEMName>Snapcrafters</OEMName>
+    </component>
+  </settings>
+</unattend>
