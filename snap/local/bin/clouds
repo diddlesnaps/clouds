@@ -5,7 +5,8 @@ echo "*** Checking for kvm interface connection"
 if snapctl is-connected kvm; then
   echo "INFO: kvm interface is connected"
 else
-  echo "ERROR: kvm interface is not connected. Run 'sudo snap connect sosumi:kvm' then re-launch sosumi."
+  echo "ERROR: kvm interface is not connected. Run 'sudo snap connect clouds:kvm' then re-launch clouds."
+  yad --center --button=OK --title="Error" --text="kvm interface is not connected. Run 'sudo snap connect clouds:kvm' then re-launch clouds."
   exit 1
 fi
 
