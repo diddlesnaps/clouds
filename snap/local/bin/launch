@@ -20,7 +20,8 @@
     -device usb-audio,audiodev=pa,multi=on \
     -netdev user,id=net0 \
     -device virtio-net,netdev=net0,id=net0 \
-    -drive if=virtio,file="$SNAP_USER_COMMON"/windows-system.qcow2 \
+    -drive id=disk,if=none,file="$SNAP_USER_COMMON"/windows-system.qcow2 \
+    -device ahci,id=ahci -device ide-hd,drive=disk,bus=ahci.0 \
     -drive media=cdrom,file="$SNAP_USER_COMMON"/windows-installer.iso,index=2 \
     -drive media=cdrom,file="$SNAP"/virtio-win.iso,index=3 \
     -drive media=cdrom,file="$SNAP"/config.iso,index=4
