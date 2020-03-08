@@ -17,7 +17,7 @@
     -device qemu-xhci \
     -usb -device usb-kbd -device usb-tablet \
     -audiodev pa,id=pa,out.mixing-engine=off,server="/run/user/$(id -u)/pulse/native" \
-    -device usb-audio,audiodev=pa,multi=on \
+    -device ich9-intel-hda -device hda-output,audiodev=pa \
     -netdev user,id=net0 \
     -device virtio-net,netdev=net0,id=net0 \
     -drive id=disk,if=none,file="$SNAP_USER_COMMON"/windows-system.qcow2 \
