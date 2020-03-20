@@ -16,7 +16,7 @@
     -L "$SNAP"/usr/lib/ipxe/qemu/ \
     -device qemu-xhci \
     -usb -device usb-kbd -device usb-tablet \
-    -audiodev pa,id=pa,out.mixing-engine=off,server="/run/user/$(id -u)/pulse/native" \
+    -audiodev pa,id=pa,server="/run/user/$(id -u)/pulse/native" \
     -device ich9-intel-hda -device hda-output,audiodev=pa \
     -netdev user,id=net0 \
     -device virtio-net,netdev=net0,id=net0 \
