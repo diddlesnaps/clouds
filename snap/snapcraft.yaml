@@ -23,29 +23,31 @@ apps:
       GDK_PIXBUF_MODULE_FILE: $SNAP_DATA/.gdk-pixbuf-loaders.cache
       XDG_DATA_DIRS: $SNAP/usr/share
       XDG_CACHE_HOME: $SNAP_USER_DATA/.cache
+    extensions: [gnome-3-28]
     command: bin/clouds
-    command-chain: [bin/desktop-launch]
     plugs:
-      - home
-      - network
-      - network-bind
-      - kvm
       - audio-record
       - audio-playback
+      - desktop
+      - home
+      - kvm
+      - network
+      - network-bind
       - network-control
-      - raw-usb
-      - x11
       - opengl
+      - removable-media
+      - raw-usb
+      - screen-inhibit-control
       - unity7
       - wayland
-      - desktop
+      - x11
 
 parts:
   downloader:
     plugin: nodejs
     source: downloader
     nodejs-version: '12.16.1'
-  
+
   config:
     plugin: nil
     source: config
@@ -72,12 +74,7 @@ parts:
     plugin: dump
     source: snap/local
     stage-packages:
-      - python3-requests  # needed to fetch-macos
-      - python3-click     # needed to fetch-macos
       - yad               # to do dialogs
-      - dmg2img           # needed to convert mac dmg files
-      #- qemu-utils        # for qemu-img etc
-      #- qemu-system-x86
       - freeglut3
       - hicolor-icon-theme
       - libegl1-mesa
@@ -163,11 +160,21 @@ parts:
       - cpu-checker
       - wget
 
-  desktop-glib-only:
-    source: https://github.com/ubuntu/snapcraft-desktop-helpers.git
-    source-subdir: glib-only
-    plugin: make
-    build-packages:
-      - libglib2.0-dev
-    stage-packages:
-      - libglib2.0-bin
+  cleanup:
+    after:
+      - downloader
+      - config
+      - virtio-drivers
+      - clouds
+    plugin: nil
+    build-snaps: [gnome-3-28-1804]  # List all content-snaps and base snaps you're using here
+    override-prime: |
+      set -eux
+      for snap in "gnome-3-28-1804"; do  # List all content-snaps and base snaps you're using here
+        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      done
+      for CRUFT in bug lintian man; do
+        rm -rf $SNAPCRAFT_PRIME/usr/share/$CRUFT
+      done
+      find $SNAPCRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
+      find $SNAPCRAFT_PRIME/usr/share -type d -empty -delete
