@@ -12,7 +12,7 @@ fi
 
 echo "*** Checking for Windows Installer ISO"
 if [ ! -f "$SNAP_USER_COMMON"/windows-installer.iso ]; then
-	URL="$(node $SNAP/index.js)"
+	URL="$(node $SNAP/index.mjs)"
 	RV=$?
 	echo "INFO: ISO download URL=$URL"
 	if [ $RV = 0 ] && [ -n "$URL" ]; then
