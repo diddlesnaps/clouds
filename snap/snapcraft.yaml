@@ -54,7 +54,7 @@ parts:
   downloader:
     plugin: nodejs
     source: downloader
-    nodejs-version: '14.16.0'
+    nodejs-version: '14.17.1'
 
   config:
     plugin: nil
