@@ -9,6 +9,7 @@ description: |
 
 grade: stable
 confinement: strict
+compression: xz
 
 architectures:
   - build-on: amd64
@@ -43,6 +44,11 @@ apps:
       - unity7
       - wayland
       - x11
+  mid:
+    command: usr/bin/fluidsynth -nia pulseaudio $SNAP/soundfont.sf3 $SNAP/CLOUDS.MID
+    extensions: [gnome-3-28]
+    plugs:
+      - audio-playback
 
 parts:
   downloader:
@@ -61,6 +67,18 @@ parts:
   egg:
     plugin: dump
     source: egg
+    stage-packages:
+      - fluidsynth
+
+  soundfont:
+    plugin: dump
+    source: egg
+    override-pull: |
+      curl -o soundfont.sf3 ftp://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf3
+    stage:
+      - -README
+    build-packages:
+      - curl
   
   virtio-drivers:
     plugin: dump
