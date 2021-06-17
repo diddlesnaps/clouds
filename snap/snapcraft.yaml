@@ -74,7 +74,7 @@ parts:
     plugin: dump
     source: egg
     override-pull: |
-      curl -o soundfont.sf3 http://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf3
+      curl -o soundfont.sf3 https://ftp.osuosl.org/pub/musescore/soundfont/MuseScore_General/MuseScore_General.sf3
     stage:
       - -README
     build-packages:
