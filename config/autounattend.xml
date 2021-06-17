@@ -72,9 +72,14 @@
       <UserData>
         <AcceptEula>false</AcceptEula>
         <ProductKey>
-          <WillShowUI>Always</WillShowUI>
+          <key>VK7JG-NPHTM-C97JM-9MPGT-3V66T</key>
+          <WillShowUI>Never</WillShowUI>
         </ProductKey>
       </UserData>
+      <DynamicUpdate>
+        <Enable>true</Enable>
+        <WillShowUI>Never</WillShowUI>
+      </DynamicUpdate>
     </component>
 
     <component name="Microsoft-Windows-PnpCustomizationsWinPE"
@@ -85,7 +90,7 @@
            This makes the VirtIO drivers available to Windows, assuming that
            the VirtIO driver disk
            (https://alt.fedoraproject.org/pub/alt/virtio-win/latest/images/bin/)
-           is available as drive D:
+           is available as drive E:
       -->
       <DriverPaths>
         <PathAndCredentials wcm:action="add" wcm:keyValue="1">
@@ -113,6 +118,16 @@
         <SupportURL>https://github.com/diddlesnaps/clouds/issues</SupportURL>
       </OEMInformation>
       <OEMName>Snapcrafters</OEMName>
+    </component>
+  </settings>
+
+  <settings pass="oobeSystem">
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64"
+      publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <OOBE>
+        <HideOEMRegistrationScreen>true</HideOEMRegistrationScreen>
+        <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
+      </OOBE>
     </component>
   </settings>
 </unattend>
