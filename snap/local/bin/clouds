@@ -44,7 +44,20 @@ if [ ! -f "$SNAP_USER_COMMON/launch" ]; then
     cp -a "$SNAP"/bin/launch "$SNAP_USER_COMMON"/launch
 fi
 
+if [ ! -f "$SNAP_USER_COMMON/OVMF_VARS.fd" ]; then
+	cp -a "$SNAP"/usr/share/OVMF/OVMF_VARS_4M.ms.fd "$SNAP_USER_COMMON/OVMF_VARS.fd"
+fi
 
-#qemu-virgil -enable-kvm -m 512 -device virtio-vga,virgl=on -display sdl,gl=on \ -netdev user,id=ethernet.0,hostfwd=tcp::10022-:22 -device rtl8139,netdev=ethernet.0 \ -soundhw ac97 some.img
+TPMDIR="$SNAP_USER_COMMON/tpm2"
+mkdir -p "$TPMDIR"
+export TPM="$TPMDIR"/swtpm-sock
+env LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/x86_64-linux-gnu/swtpm" \
+"$SNAP"/usr/bin/swtpm socket \
+	--tpmstate dir="$TPMDIR" \
+	--tpm2 \
+	--ctrl type=unixio,path="$TPM" \
+	&
+TPMPID=$!
+
 echo "*** Launch!"
 exec "$SNAP_USER_COMMON"/launch

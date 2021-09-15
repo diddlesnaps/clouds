@@ -2,10 +2,11 @@
 
 "$SNAP"/usr/bin/qemu-system-x86_64 \
     -enable-kvm \
-    -m 2G \
-    -machine q35,accel=kvm \
+    -m 4G \
+    -machine q35,smm=on,accel=kvm \
     -smp 4,cores=2 \
-    -cpu Penryn,vendor=GenuineIntel,kvm=on,+sse3,+sse4.2,+aes,+xsave,+avx,+xsaveopt,+xsavec,+xgetbv1,+avx2,+bmi2,+smep,+bmi1,+fma,+movbe,+invtsc \
+    -cpu host,kvm=on \
+    -smbios type=0,uefi=on \
     -smbios type=2 \
     -rtc base=localtime,clock=host \
     -object rng-random,id=rng0,filename=/dev/urandom \
@@ -14,6 +15,12 @@
     -device virtio-vga,virgl=on \
     -L "$SNAP"/usr/share/seabios/ \
     -L "$SNAP"/usr/lib/ipxe/qemu/ \
+    -global driver=cfi.pflash01,property=secure,value=on \
+    -drive if=pflash,format=raw,unit=0,file="$SNAP"/usr/share/OVMF/OVMF_CODE_4M.ms.fd,readonly=on \
+    -drive if=pflash,format=raw,unit=1,file="$SNAP_USER_COMMON"/OVMF_VARS.fd \
+    -chardev socket,id=chrtpm,path="$TPM" \
+    -tpmdev emulator,id=tpm0,chardev=chrtpm \
+    -device tpm-tis,tpmdev=tpm0 \
     -device qemu-xhci \
     -usb -device usb-kbd -device usb-tablet \
     -audiodev pa,id=pa,server="/run/user/$(id -u)/pulse/native" \
@@ -21,7 +28,10 @@
     -netdev user,id=net0 \
     -device virtio-net,netdev=net0,id=net0 \
     -drive id=disk,if=none,file="$SNAP_USER_COMMON"/windows-system.qcow2 \
-    -device ahci,id=ahci -device ide-hd,drive=disk,bus=ahci.0 \
-    -drive media=cdrom,file="$SNAP_USER_COMMON"/windows-installer.iso,index=2 \
-    -drive media=cdrom,file="$SNAP"/virtio-win.iso,index=3 \
-    -drive media=cdrom,file="$SNAP"/config.iso,index=4
+    -device ahci,id=ahci \
+    -device ide-hd,drive=disk,bus=ahci.0,bootindex=1 \
+    -drive id=installer,if=none,media=cdrom,file="$SNAP_USER_COMMON"/windows-installer.iso \
+    -device ide-cd,drive=installer,bus=ahci.1,bootindex=2 \
+    -drive media=cdrom,file="$SNAP"/virtio-win.iso \
+    -drive media=cdrom,file="$SNAP"/config.iso \
+    ;

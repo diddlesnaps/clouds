@@ -37,25 +37,41 @@
               <Type>Primary</Type>
             </CreatePartition>
             <CreatePartition wcm:action="add">
-              <Extend>true</Extend>
               <Order>2</Order>
+              <Type>EFI</Type>
+              <Size>100</Size>
+            </CreatePartition>
+            <CreatePartition>
+              <Order>3</Order>
+              <Type>MSR</Type>
+              <Size>128</Size>
+            </CreatePartition>
+            <CreatePartition wcm:action="add">
+              <Extend>true</Extend>
+              <Order>4</Order>
               <Type>Primary</Type>
             </CreatePartition>
           </CreatePartitions>
           <ModifyPartitions>
             <ModifyPartition wcm:action="add">
-              <Active>true</Active>
-              <Format>NTFS</Format>
-              <Label>System</Label>
               <Order>1</Order>
               <PartitionID>1</PartitionID>
+              <Format>NTFS</Format>
+              <Label>Recovery</Label>
+              <TypeID>de94bba4-06d1-4d40-a16a-bfd50179d6ac</TypeID>
+            </ModifyPartition>
+            <ModifyPartition wcm:action="add">
+              <Order>2</Order>
+              <PartitionID>2</PartitionID>
+              <Label>System</Label>
+              <Format>FAT32</Format>
             </ModifyPartition>
             <ModifyPartition wcm:action="add">
               <Format>NTFS</Format>
               <Label>Windows</Label>
               <Letter>C</Letter>
-              <Order>2</Order>
-              <PartitionID>2</PartitionID>
+              <Order>3</Order>
+              <PartitionID>4</PartitionID>
             </ModifyPartition>
           </ModifyPartitions>
         </Disk>
@@ -65,7 +81,7 @@
         <OSImage>
           <InstallTo>
             <DiskID>0</DiskID>
-            <PartitionID>2</PartitionID>
+            <PartitionID>4</PartitionID>
           </InstallTo>
         </OSImage>
       </ImageInstall>
@@ -97,9 +113,12 @@
           <Path>E:\amd64\w10</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="2">
-          <Path>E:\viorng\w10\amd64</Path>
+          <Path>E:\viogpudo\w10\amd64</Path>
         </PathAndCredentials>
         <PathAndCredentials wcm:action="add" wcm:keyValue="3">
+          <Path>E:\viorng\w10\amd64</Path>
+        </PathAndCredentials>
+        <PathAndCredentials wcm:action="add" wcm:keyValue="4">
           <Path>E:\NetKVM\w10\amd64</Path>
         </PathAndCredentials>
       </DriverPaths>
