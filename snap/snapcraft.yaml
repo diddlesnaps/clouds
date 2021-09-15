@@ -109,6 +109,13 @@ parts:
       - ttf-ubuntu-font-family
       - cpu-checker
       - wget
+    stage:
+      - -usr/share/qemu/hppa-firmware.bin
+      - -usr/share/qemu/openbios-ppc
+      - -usr/share/qemu/openbios-sparc32
+      - -usr/share/qemu/openbios-sparc64
+      - -usr/share/qemu/opensbi-risc64-generic-fw_dynamic.bin
+      - -usr/share/qemu/opensbi-risc64-generic-fw_dynamic.elf
 
   cleanup:
     after:
