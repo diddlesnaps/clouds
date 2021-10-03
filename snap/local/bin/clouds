@@ -3,16 +3,16 @@
 
 echo "*** Checking for kvm interface connection"
 if snapctl is-connected kvm; then
-  echo "INFO: kvm interface is connected"
+	echo "INFO: kvm interface is connected"
 else
-  echo "ERROR: kvm interface is not connected. Run 'sudo snap connect clouds:kvm' then re-launch clouds."
-  yad --center --button=OK --title="Error" --text="kvm interface is not connected. Run 'sudo snap connect clouds:kvm' then re-launch clouds."
-  exit 1
+	echo "ERROR: kvm interface is not connected. Run 'sudo snap connect clouds:kvm' then re-launch clouds."
+	yad --center --button=OK --title="Error" --text="kvm interface is not connected. Run 'sudo snap connect clouds:kvm' then re-launch clouds."
+	exit 1
 fi
 
 echo "*** Checking for Windows Installer ISO"
 if [ ! -f "$SNAP_USER_COMMON"/windows-installer.iso ]; then
-	URL="$(node $SNAP/index.mjs)"
+	URL="$($SNAP/bin/downloader)"
 	RV=$?
 	echo "INFO: ISO download URL=$URL"
 	if [ $RV = 0 ] && [ -n "$URL" ]; then
