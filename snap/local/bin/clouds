@@ -45,7 +45,7 @@ if [ ! -f "$SNAP_USER_COMMON/launch" ]; then
 fi
 
 if [ ! -f "$SNAP_USER_COMMON/OVMF_VARS.fd" ]; then
-	cp -a "$SNAP"/usr/share/OVMF/OVMF_VARS_4M.ms.fd "$SNAP_USER_COMMON/OVMF_VARS.fd"
+	cp -a "$SNAP"/usr/share/OVMF/OVMF_VARS_4M.fd "$SNAP_USER_COMMON/OVMF_VARS.fd"
 fi
 
 TPMDIR="$SNAP_USER_COMMON/tpm2"
@@ -54,8 +54,9 @@ export TPM="$TPMDIR"/swtpm-sock
 env LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+$LD_LIBRARY_PATH:}$SNAP/usr/lib/x86_64-linux-gnu/swtpm" \
 "$SNAP"/usr/bin/swtpm socket \
 	--tpmstate dir="$TPMDIR" \
-	--tpm2 \
 	--ctrl type=unixio,path="$TPM" \
+	--tpm2 \
+	--terminate \
 	&
 TPMPID=$!
 

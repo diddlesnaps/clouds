@@ -1,5 +1,5 @@
 name: clouds
-base: core20
+base: core22
 assumes:
   - snapd2.43
 version: '0.666'
@@ -11,62 +11,72 @@ grade: stable
 confinement: strict
 compression: lzo
 
-package-repositories:
-  - type: apt
-    ppa: diddledani/qemu
-
 architectures:
   - build-on: amd64
-    run-on: amd64
 
 layout:
-  /usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qemu:
-    bind: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/qemu
+  /usr/lib/$CRAFT_ARCH_TRIPLET/qemu:
+    bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/qemu
+  /usr/lib/ipxe:
+    bind: $SNAP/usr/lib/ipxe
+  /usr/share/libdrm:
+    bind: $SNAP/usr/share/libdrm
+  /usr/share/seabios:
+    bind: $SNAP/usr/share/seabios
+  /usr/share/qemu:
+    bind: $SNAP/usr/share/qemu
 
 apps:
   clouds:
-    extensions: [gnome-3-38]
+    extensions: [gnome]
     command: bin/clouds
     plugs:
       - audio-playback
       - audio-record
-      - desktop
       - home
       - kvm
       - network
       - network-bind
       - network-control
-      - opengl
       - raw-usb
       - removable-media
       - screen-inhibit-control
-      - unity7
-      - wayland
-      - x11
   mid:
     command: usr/bin/fluidsynth -nia pulseaudio $SNAP/soundfont.sf3 $SNAP/CLOUDS.MID
-    extensions: [gnome-3-38]
+    extensions: [gnome]
     plugs:
       - audio-playback
   mp3:
     command: usr/bin/mpg123.bin -o pulse $SNAP/clouds.mp3
     environment:
-      MPG123_MODDIR: $SNAP/usr/lib/$SNAPCRAFT_ARCH_TRIPLET/mpg123
-    extensions: [gnome-3-38]
+      MPG123_MODDIR: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/mpg123
+    extensions: [gnome]
     plugs:
       - audio-playback
 
 parts:
+  npm-deps:
+    plugin: dump
+    source: https://nodejs.org/dist/v16.16.0/node-v16.16.0-linux-x64.tar.xz
+    stage:
+      - -include
+      - -share
+    prime:
+      - -bin/corepack
+      - -bin/npm
+      - -bin/npx
+      - -lib
+
   downloader:
+    after: [npm-deps]
     plugin: npm
     source: downloader
-    npm-node-version: '14.17.6'
 
   config:
     plugin: nil
     source: config
     override-build: |
-      mkisofs -l -o $SNAPCRAFT_PART_INSTALL/config.iso .
+      mkisofs -l -o $CRAFT_PART_INSTALL/config.iso .
     build-packages:
       - genisoimage
 
@@ -76,6 +86,10 @@ parts:
     stage-packages:
       - fluidsynth
       - mpg123
+    stage:
+      - -etc/default
+      - -usr/lib/mime
+      - -usr/lib/systemd
 
   soundfont:
     plugin: dump
@@ -89,7 +103,7 @@ parts:
 
   virtio-drivers:
     plugin: dump
-    source: .
+    source: config
     override-pull: |
       wget https://fedorapeople.org/groups/virt/virtio-win/direct-downloads/latest-virtio/virtio-win.iso -O virtio-win.iso
     build-packages:
@@ -106,32 +120,76 @@ parts:
       - ovmf
       - seabios
       - swtpm
-      - ttf-ubuntu-font-family
+      - fonts-ubuntu
       - cpu-checker
       - wget
     stage:
-      - -usr/share/qemu/hppa-firmware.bin
+      - -bin/chacl
+      - -bin/getfacl
+      - -bin/setfacl
+      - -etc/apparmor.d
+      - -etc/default
+      - -etc/init.d
+      - -etc/X11
+      - -lib/systemd
+      - -usr/share/applications
+      - -usr/share/icons
+      - -usr/lib/ipxe/*.rom
+      - -usr/lib/ipxe/qemu/efi-e1000.rom
+      - -usr/lib/ipxe/qemu/efi-e1000e.rom
+      - -usr/lib/ipxe/qemu/efi-eepro100.rom
+      - -usr/lib/ipxe/qemu/efi-ne2k_pci.rom
+      - -usr/lib/ipxe/qemu/efi-pcnet.rom
+      - -usr/lib/ipxe/qemu/efi-rtl8139.rom
+      - -usr/lib/ipxe/qemu/efi-vmxnet.rom
+      - -usr/lib/ipxe/qemu/pxe-*.rom
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/gdk-pixbuf-2.0
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/gtk-3.0
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libatk-1.0*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libcairo*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libdecor-0*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libgdk-3*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libgtk-3*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libharfbuzz*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libpango*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libwayland-*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libXss.so*
+      - -usr/lib/$CRAFT_ARCH_TRIPLET/libXt.so*
+      - -usr/share/qemu/bamboo.dtb
+      - -usr/share/qemu/bios-microvm.bin
+      - -usr/share/qemu/canyonlands.dtb
+      - -usr/share/qemu/hppa-firmware.img
       - -usr/share/qemu/openbios-ppc
       - -usr/share/qemu/openbios-sparc32
       - -usr/share/qemu/openbios-sparc64
-      - -usr/share/qemu/opensbi-risc64-generic-fw_dynamic.bin
-      - -usr/share/qemu/opensbi-risc64-generic-fw_dynamic.elf
+      - -usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.bin
+      - -usr/share/qemu/opensbi-riscv64-generic-fw_dynamic.elf
+      - -usr/share/qemu/qboot.rom
+      - -usr/share/qemu/s390-ccw.img
+      - -usr/share/qemu/s390-netboot.img
+      - -usr/share/qemu/skiboot.lib
+      - -usr/share/qemu/slof.bin
+      - -usr/share/qemu/trace-events-all
+      - -usr/share/qemu/vof.bin
 
   cleanup:
     after:
-      - downloader
-      - config
-      - virtio-drivers
       - clouds
+      - config
+      - egg
+      - downloader
+      - virtio-drivers
     plugin: nil
-    build-snaps: [gnome-3-38-2004]  # List all content-snaps and base snaps you're using here
+    build-snaps: [gnome-42-2204]  # List all content-snaps and base snaps you're using here
     override-prime: |
       set -eux
-      for snap in "gnome-3-38-2004"; do  # List all content-snaps and base snaps you're using here
-        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$SNAPCRAFT_PRIME/{}" \;
+      for snap in "gnome-42-2204"; do  # List all content-snaps and base snaps you're using here
+        cd "/snap/$snap/current" && find . -type f,l -exec rm -f "$CRAFT_PRIME/{}" \;
       done
-      for CRUFT in bug lintian man; do
-        rm -rf $SNAPCRAFT_PRIME/usr/share/$CRUFT
+      for CRUFT in aclocal bug info lintian man; do
+        rm -rf $CRAFT_PRIME/usr/share/$CRUFT
       done
-      find $SNAPCRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
-      find $SNAPCRAFT_PRIME/usr/share -type d -empty -delete
+      find $CRAFT_PRIME/usr/share/doc/ -type f -not -name 'copyright' -delete
+      find $CRAFT_PRIME/usr/share -type d -empty -delete
+      find $CRAFT_PRIME/etc -type d -empty -delete
+      find $CRAFT_PRIME/usr -type d -empty -delete
