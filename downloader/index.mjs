@@ -7,7 +7,6 @@ import { exit } from 'process';
 
 function extractBuildNumber(version) {
     const matches = version.name.match(/(?:\(build |\[)([0-9.]+)(?:\)|\])$/)
-    console.debug(matches[1])
     return matches[1]
 }
 
