@@ -44,6 +44,10 @@ if [ ! -f "$SNAP_USER_COMMON/launch" ]; then
     cp -a "$SNAP"/bin/launch "$SNAP_USER_COMMON"/launch
 fi
 
+if [ ! -f "$SNAP_USER_COMMON/machine-uuid" ]; then
+	uuid -v1 -o "$SNAP_USER_COMMON/machine-uuid"
+fi
+
 if [ ! -f "$SNAP_USER_COMMON/OVMF_VARS.fd" ]; then
 	cp -a "$SNAP"/usr/share/OVMF/OVMF_VARS_4M.fd "$SNAP_USER_COMMON/OVMF_VARS.fd"
 fi

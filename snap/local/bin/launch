@@ -1,14 +1,19 @@
 #!/bin/bash
 
+numthreads="$(lscpu | awk '/Thread\(s\) per core:/ { print $4 }')"
+numcores="$(lscpu | awk '/Core\(s\) per socket:/ { print $4 }')"
+numsockets="$(lscpu | awk '/Socket\(s\):/ { print $2 }')"
+
 "$SNAP"/usr/bin/qemu-system-x86_64 \
+    -smbios type=1,manufacturer=snapcrafters,product=clouds,serial=snapcrafters,uuid=$(cat $SNAP_USER_COMMON/machine-uuid),sku=cloudsvm,family=clouds \
     -enable-kvm \
     -no-hpet \
     -global kvm-pit.lost_tick_policy=discard \
     -global ICH9-LPC.disable_s3=1 \
     -machine q35,smm=on,vmport=off \
     -m 4G \
-    -cpu host,kvm=on,+hypervisor,+invtsc,l3-cache=on,migratable=no,hv_frequencies,kvm_pv_unhalt,hv_reenlightenment,hv_relaxed,hv_spinlocks=8191,hv_stimer,hv_synic,hv_time,hv_vapic,hv_vendor_id=1234567890ab,hv_vpindex,topoext \
-    -smp $(awk '/^processor/{n+=1}END{print n}' /proc/cpuinfo) \
+    -cpu host,kvm=on,+hypervisor,+invtsc,l3-cache=on,migratable=no,hv_passthrough,topoext \
+    -smp cores="$numcores",threads="$numthreads",sockets="$numsockets" \
     -device qxl-vga,ram_size=65536,vram_size=65536,vgamem_mb=64 \
     -display sdl,gl=on \
     -audiodev pa,id=pa,out.mixing-engine=off,out.stream-name=clouds-snap,in.stream-name=clouds-snap,server="/run/user/$(id -u)/pulse/native" \

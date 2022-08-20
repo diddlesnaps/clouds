@@ -3,9 +3,11 @@ base: core22
 assumes:
   - snapd2.43
 version: '0.666'
-summary: Download and install Windows 10 in a VM
+summary: Download, install, and run Windows in a VM
 description: |
-  Download and install Windows 10 in a VM
+  Download, install, and run Windows 10 or 11 in a VM.
+
+  The app will walk you through downloading a Windows DVD image, and launch the installation. Most of the installation is automated to reduce the chance of errors while installing. Once Windows is installed Clouds will boot directly into the operating system whenever you launch the app.
 
 grade: stable
 confinement: strict
@@ -122,6 +124,8 @@ parts:
       - swtpm
       - fonts-ubuntu
       - cpu-checker
+      - util-linux
+      - uuid
       - wget
     stage:
       - -bin/chacl

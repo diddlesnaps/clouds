@@ -26,8 +26,32 @@
     </component>
   </settings>
 
+  <settings pass="specialize">
+    <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <SkipAutoActivation>true</SkipAutoActivation>
+    </component>
+    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <OEMInformation>
+        <Manufacturer>Snapcrafters</Manufacturer>
+        <Model>SnapVM</Model>
+        <SupportHours>24/7</SupportHours>
+        <SupportPhone></SupportPhone>
+        <SupportProvider>Snapcrafters</SupportProvider>
+        <SupportURL>https://github.com/diddlesnaps/clouds/issues</SupportURL>
+      </OEMInformation>
+      <OEMName>Snapcrafters</OEMName>
+      <ProductKey>VK7JG-NPHTM-C97JM-9MPGT-3V66T</ProductKey>
+    </component>
+    <component name="Microsoft-Windows-SQMApi" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" xmlns:wcm="http://schemas.microsoft.com/WMIConfig/2002/State" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+      <CEIPEnabled>0</CEIPEnabled>
+    </component>
+  </settings>
+
   <settings pass="windowsPE">
     <component name="Microsoft-Windows-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
+      <Diagnostics>
+        <OptIn>false</OptIn>
+      </Diagnostics>
       <DiskConfiguration>
         <Disk wcm:action="add">
           <DiskID>0</DiskID>
@@ -74,32 +98,46 @@
               <Label>System</Label>
               <Format>FAT32</Format>
             </ModifyPartition>
+            <!-- MSR partition does not need to be modified -->
+            <ModifyPartition wcm:action="add">
+              <Order>3</Order>
+              <PartitionID>3</PartitionID>
+            </ModifyPartition>
             <!-- Windows partition -->
             <ModifyPartition wcm:action="add">
-              <Format>NTFS</Format>
+              <Order>4</Order>
+              <PartitionID>4</PartitionID>
               <Label>Windows</Label>
               <Letter>C</Letter>
-              <Order>3</Order>
-              <PartitionID>4</PartitionID>
+              <Format>NTFS</Format>
             </ModifyPartition>
           </ModifyPartitions>
         </Disk>
         <WillShowUI>OnError</WillShowUI>
       </DiskConfiguration>
+      <DynamicUpdate>
+        <Enable>true</Enable>
+        <WillShowUI>Never</WillShowUI>
+      </DynamicUpdate>
       <ImageInstall>
         <OSImage>
           <InstallTo>
             <DiskID>0</DiskID>
             <PartitionID>4</PartitionID>
           </InstallTo>
+          <InstallToAvailablePartition>false</InstallToAvailablePartition>
         </OSImage>
       </ImageInstall>
       <RunSynchronous>
         <RunSynchronousCommand wcm:action="add">
-          <Order>2</Order>
-          <Path>reg add HKLM\System\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 1 /f</Path>
+          <Order>1</Order>
+          <Path>reg add HKLM\System\Setup\LabConfig /v BypassRAMCheck /t REG_DWORD /d 0x00000001 /f</Path>
         </RunSynchronousCommand>
       </RunSynchronous>
+      <UpgradeData>
+        <Upgrade>false</Upgrade>
+        <WillShowUI>Never</WillShowUI>
+      </UpgradeData>
       <UserData>
         <AcceptEula>false</AcceptEula>
         <ProductKey>
@@ -107,18 +145,9 @@
           <WillShowUI>Never</WillShowUI>
         </ProductKey>
       </UserData>
-      <DynamicUpdate>
-        <Enable>true</Enable>
-        <WillShowUI>Never</WillShowUI>
-      </DynamicUpdate>
-      <UpgradeData>
-        <Upgrade>false</Upgrade>
-        <WillShowUI>Never</WillShowUI>
-      </UpgradeData>
     </component>
 
     <component name="Microsoft-Windows-PnpCustomizationsWinPE" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS" processorArchitecture="amd64">
-
       <!--
         This makes the VirtIO drivers available to Windows, assuming that
         the VirtIO driver disk is available as drive E:
@@ -165,24 +194,6 @@
     </component>
   </settings>
 
-  <settings pass="specialize">
-    <component name="Microsoft-Windows-Security-SPP-UX" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-      <SkipAutoActivation>true</SkipAutoActivation>
-    </component>
-    <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
-      <OEMInformation>
-        <Manufacturer>Snapcrafters</Manufacturer>
-        <Model>SnapVM</Model>
-        <SupportHours>24/7</SupportHours>
-        <SupportPhone></SupportPhone>
-        <SupportProvider>Snapcrafters</SupportProvider>
-        <SupportURL>https://github.com/diddlesnaps/clouds/issues</SupportURL>
-      </OEMInformation>
-      <OEMName>Snapcrafters</OEMName>
-      <ProductKey>VK7JG-NPHTM-C97JM-9MPGT-3V66T</ProductKey>
-    </component>
-  </settings>
-
   <settings pass="oobeSystem">
     <component name="Microsoft-Windows-Shell-Setup" processorArchitecture="amd64" publicKeyToken="31bf3856ad364e35" language="neutral" versionScope="nonSxS">
       <OOBE>
@@ -192,6 +203,7 @@
         <HideOnlineAccountScreens>false</HideOnlineAccountScreens>
         <HideWirelessSetupInOOBE>true</HideWirelessSetupInOOBE>
         <NetworkLocation>Home</NetworkLocation>
+        <ProtectYourPC>3</ProtectYourPC>
         <SkipUserOOBE>false</SkipUserOOBE>
         <SkipMachineOOBE>false</SkipMachineOOBE>
         <VMModeOptimizations>
