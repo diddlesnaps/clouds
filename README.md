@@ -1,7 +1,7 @@
 # Clouds
 
 <h1 align="center">
-  <img src="https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,w_120,h_120/https://dashboard.snapcraft.io/site_media/appmedia/2020/02/Looped_square_on_white_background.svg.png" alt="Clouds">
+  <img src="snap/gui/clouds.png" style="width: 256px; height: 256px;" alt="Clouds">
   <br />
   Clouds
 </h1>
