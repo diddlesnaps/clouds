@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 
 import { exec } from 'child_process';
-import { symlinkSync } from 'fs';
 import fetch from 'node-fetch'
-import { exit } from 'process';
 
 function extractBuildNumber(version) {
     const matches = version.name.match(/(?:\(build |\[)([0-9.]+)(?:\)|\])$/)
