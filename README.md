@@ -18,7 +18,7 @@
   <img alt="Clouds" src="https://snapcraft.io/clouds/trending.svg?name=0" />
   </a>
 
-![Clouds](https://res.cloudinary.com/canonical/image/fetch/f_auto,q_auto,fl_sanitize,w_1638,h_976/https://dashboard.snapcraft.io/site_media/appmedia/2020/02/Screenshot_from_2020-02-28_00-22-31.png "Clouds")
+![Clouds](https://dashboard.snapcraft.io/site_media/appmedia/2020/03/Screenshot_from_2020-03-06_23-52-55.png "Clouds")
 
 <p align="center">Published for <img src="https://raw.githubusercontent.com/anythingcodes/slack-emoji-for-techies/gh-pages/emoji/tux.png" align="top" width="24" /> with 💝 by Snapcrafters</p>
 
