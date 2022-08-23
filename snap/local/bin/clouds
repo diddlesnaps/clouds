@@ -1,6 +1,19 @@
 #!/bin/bash
 # closing-doors
 
+function get_wim_imagenum() {
+	wiminfo "$SNAP_USER_COMMON"/extracted-iso/sources/install.wim --xml | "$SNAP"/bin/guess-wim-imageid.py
+}
+
+function get_windows_name() {
+	wiminfo "$SNAP_USER_COMMON"/extracted-iso/sources/install.wim "$(get_wim_imagenum)" | \
+		awk -F: '/^Display Name/ { gsub(/^[ ]+/,"", $2); print $2 }'
+}
+
+function get_windows_version() {
+	get_windows_name "$(get_wim_imagenum)" | sed -Ee 's/^Windows ([0-9]+(\.[0-9]+)?) Pro(fessional)?$/\1/'
+}
+
 echo "*** Checking for kvm interface connection"
 if snapctl is-connected kvm; then
 	echo "INFO: kvm interface is connected"
@@ -10,13 +23,13 @@ else
 	exit 1
 fi
 
-echo "*** Checking for Windows Installer ISO"
-if [ ! -f "$SNAP_USER_COMMON"/windows-installer.iso ]; then
+echo "*** Checking for Downloaded Windows ISO"
+if [ ! -f "$SNAP_USER_COMMON"/windows-download.iso ]; then
 	URL="$($SNAP/bin/downloader)"
 	RV=$?
 	echo "INFO: ISO download URL=$URL"
 	if [ $RV = 0 ] && [ -n "$URL" ]; then
-		wget "${URL}" -O "$SNAP_USER_COMMON"/windows-installer.iso -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | \
+		wget "${URL}" -O "$SNAP_USER_COMMON"/windows-download.iso -U "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36" 2>&1 | \
 		perl -p -e '$| = 1; s/^.* +([0-9]+%) +([0-9,.]+[GMKB]) +([0-9hms,.]+).*$/\1\n# Downloading Windows ISO image... \2 (\3)/' | \
 		yad --progress --title="Windows ISO Image" --width=400 --center --no-buttons --auto-close --auto-kill --on-top --no-escape
 
@@ -34,6 +47,35 @@ if [ ! -f "$SNAP_USER_COMMON"/windows-installer.iso ]; then
 	fi
 fi
 
+IMAGENUM=
+
+echo "*** Checking for custom repack of Downloaded Windows ISO"
+if [ ! -f "$SNAP_USER_COMMON"/windows-installer.iso ]; then
+	rm -rf "$SNAP_USER_COMMON"/extracted-iso
+	7z x -y -o"$SNAP_USER_COMMON"/extracted-iso "$SNAP_USER_COMMON"/windows-download.iso
+
+	IMAGENUM="$(get_wim_imagenum)"
+	if [ -z "$IMAGENUM" ]; then
+		echo "ERROR: There is no Windows Professional SKU in the downloaded ISO file"
+		exit 1
+	fi
+
+	wimupdate "$SNAP_USER_COMMON"/extracted-iso/sources/install.wim "$IMAGENUM" <<EOF
+add '$SNAP/Unattend.xml' '/Windows/Panther/Unattend/Unattend.xml'
+add '$SNAP/hosts' '/Windows/System32/drivers/etc/hosts'
+EOF
+
+	cp "$SNAP/Autounattend_win$(get_windows_version).xml" "$SNAP_USER_COMMON"/extracted-iso/Autounattend.xml
+	genisoimage -udf -l --allow-limited-size -b efi/microsoft/boot/efisys_noprompt.bin -o "$SNAP_USER_COMMON"/windows-installer.iso "$SNAP_USER_COMMON"/extracted-iso
+fi
+
+if [ -d "$SNAP_USER_COMMON"/extracted-iso ] && [ -f "$SNAP_USER_COMMON"/extracted-iso/sources/install.wim ]; then
+	if [ -z "$IMAGENAME" ]; then
+		IMAGENAME="$(get_windows_name)"
+	fi
+	export QEMU_TITLE="Clouds VM: $IMAGENAME ($SNAP_INSTANCE_NAME)"
+fi
+
 echo "*** Checking for System Disk Image"
 if [ ! -f "$SNAP_USER_COMMON"/windows-system.qcow2 ]; then
 	qemu-img create -f qcow2 "$SNAP_USER_COMMON"/windows-system.qcow2 64G
@@ -42,10 +84,6 @@ fi
 echo "*** Checking for launch script"
 if [ ! -f "$SNAP_USER_COMMON/launch" ]; then
     cp -a "$SNAP"/bin/launch "$SNAP_USER_COMMON"/launch
-fi
-
-if [ ! -f "$SNAP_USER_COMMON/machine-uuid" ]; then
-	uuid -v1 -o "$SNAP_USER_COMMON/machine-uuid"
 fi
 
 if [ ! -f "$SNAP_USER_COMMON/OVMF_VARS.fd" ]; then

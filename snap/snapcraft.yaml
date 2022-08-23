@@ -21,12 +21,18 @@ layout:
     bind: $SNAP/usr/lib/$CRAFT_ARCH_TRIPLET/qemu
   /usr/lib/ipxe:
     bind: $SNAP/usr/lib/ipxe
+  /usr/lib/p7zip:
+    bind: $SNAP/usr/lib/p7zip
   /usr/share/libdrm:
     bind: $SNAP/usr/share/libdrm
   /usr/share/seabios:
     bind: $SNAP/usr/share/seabios
   /usr/share/qemu:
     bind: $SNAP/usr/share/qemu
+
+environment:
+  PYTHONHOME: $SNAP/gnome-platform/usr
+  PYTHONPATH: $SNAP/usr/lib/python3/dist-packages
 
 apps:
   clouds:
@@ -75,12 +81,11 @@ parts:
     source: downloader
 
   config:
-    plugin: nil
+    plugin: dump
     source: config
-    override-build: |
-      mkisofs -l -o $CRAFT_PART_INSTALL/config.iso .
     build-packages:
       - genisoimage
+      - wimtools
 
   egg:
     plugin: dump
@@ -124,9 +129,12 @@ parts:
       - swtpm
       - fonts-ubuntu
       - cpu-checker
+      - genisoimage
+      - p7zip-full
+      - python3-xmltodict
       - util-linux
-      - uuid
       - wget
+      - wimtools
     stage:
       - -bin/chacl
       - -bin/getfacl

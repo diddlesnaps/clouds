@@ -5,7 +5,7 @@ numcores="$(lscpu | awk '/Core\(s\) per socket:/ { print $4 }')"
 numsockets="$(lscpu | awk '/Socket\(s\):/ { print $2 }')"
 
 "$SNAP"/usr/bin/qemu-system-x86_64 \
-    -smbios type=1,manufacturer=snapcrafters,product=clouds,serial=snapcrafters,uuid=$(cat $SNAP_USER_COMMON/machine-uuid),sku=cloudsvm,family=clouds \
+    -name "$QEMU_TITLE" \
     -enable-kvm \
     -no-hpet \
     -global kvm-pit.lost_tick_policy=discard \
@@ -31,7 +31,6 @@ numsockets="$(lscpu | awk '/Socket\(s\):/ { print $2 }')"
     -drive if=pflash,format=raw,unit=1,file="$SNAP_USER_COMMON"/OVMF_VARS.fd \
     -drive media=cdrom,index=0,file="$SNAP_USER_COMMON"/windows-installer.iso \
     -drive media=cdrom,index=1,file="$SNAP"/virtio-win.iso \
-    -drive media=cdrom,index=2,file="$SNAP"/config.iso \
     -device virtio-blk-pci,drive=SystemDisk \
     -drive id=SystemDisk,if=none,format=qcow2,file="$SNAP_USER_COMMON"/windows-system.qcow2 \
     -chardev socket,id=chrtpm,path="$TPM" \
