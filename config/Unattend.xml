@@ -54,11 +54,28 @@
           <SkipWinREInitialization>true</SkipWinREInitialization>
         </VMModeOptimizations>
       </OOBE>
+      <UserAccounts>
+        <LocalAccounts>
+          <LocalAccount wcm:action="add">
+            <Name>default-user</Name>
+            <DisplayName>default-user</DisplayName>
+            <Group>Administrators;PowerUsers</Group>
+            <Password>
+              <Value>UABhAHMAcwB3AG8AcgBkAA==</Value>
+              <PlainText>false</PlainText>
+            </Password>
+          </LocalAccount>
+        </LocalAccounts>
+      </UserAccounts>
       <FirstLogonCommands>
+        <SynchronousCommand wcm:action="add">
+          <Order>1</Order>
+          <CommandLine>net user "default-user" /logonpasswordchg:yes</CommandLine>
+        </SynchronousCommand>
         <SynchronousCommand wcm:action="add">
           <CommandLine>msiexec /i E:\guest-agent\qemu-ga-x86_64.msi /quiet /passive /qn</CommandLine>
           <Description>Install Virtio Guest Agent</Description>
-          <Order>1</Order>
+          <Order>2</Order>
         </SynchronousCommand>
       </FirstLogonCommands>
     </component>
