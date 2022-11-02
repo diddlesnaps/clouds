@@ -31,8 +31,9 @@ numsockets="$(lscpu | awk '/Socket\(s\):/ { print $2 }')"
     -drive if=pflash,format=raw,unit=1,file="$SNAP_USER_COMMON"/OVMF_VARS.fd \
     -drive media=cdrom,index=0,file="$SNAP_USER_COMMON"/windows-installer.iso \
     -drive media=cdrom,index=1,file="$SNAP"/virtio-win.iso \
-    -device virtio-blk-pci,drive=SystemDisk \
-    -drive id=SystemDisk,if=none,format=qcow2,file="$SNAP_USER_COMMON"/windows-system.qcow2 \
+    -device virtio-scsi-pci,id=scsi0 \
+    -device scsi-hd,drive=SystemDisk,bus=scsi0.0,lun=0,rotation_rate=1 \
+    -drive id=SystemDisk,if=none,format=qcow2,file="$SNAP_USER_COMMON"/windows-system.qcow2,discard=unmap \
     -chardev socket,id=chrtpm,path="$TPM" \
     -tpmdev emulator,id=tpm0,chardev=chrtpm \
     -device tpm-tis,tpmdev=tpm0 \
