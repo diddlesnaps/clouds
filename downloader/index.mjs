@@ -12,11 +12,11 @@ async function fetchApiResultAndRequestDecision(prompt, url, nameKey, resultKey,
     const res = await fetch(url)
     const body = await res.json()
     let entries = Object.values(body).pop()
-    if (sortFn) {
-        entries.sort(sortFn)
-    }
     if (filterFn) {
         entries = entries.filter(filterFn)
+    }
+    if (sortFn) {
+        entries.sort(sortFn)
     }
 
     const choice = await new Promise((resolve, reject) => {
@@ -43,7 +43,7 @@ async function fetchDownloadUrl(arch) {
 
 (async function() {
     try {
-        const version  = await fetchApiResultAndRequestDecision('Version', `https://tb.rg-adguard.net/php/get_version.php?type_id=1`, 'name', 'version_id', (a, b) => extractBuildNumber(b) - extractBuildNumber(a), (e) => !e.name.startsWith('Windows 8') && !e.name.startsWith('Windows 10, Version 1809'))
+        const version  = await fetchApiResultAndRequestDecision('Version', `https://tb.rg-adguard.net/php/get_version.php?type_id=1`, 'name', 'version_id', (a, b) => extractBuildNumber(b) - extractBuildNumber(a), (e) => !e.name.startsWith('Windows 8') && !e.name.startsWith('Windows 10, Version 1809') && !/(?:\(build |\[)([0-9]+\.[Xx]+)(?:\)|\])$/.test(e.name))
         const edition  = await fetchApiResultAndRequestDecision('Edition', `https://tb.rg-adguard.net/php/get_edition.php?version_id=${version}&lang=name_en`, 'name_en', 'edition_id', null, null)
         const language = await fetchApiResultAndRequestDecision('Language', `https://tb.rg-adguard.net/php/get_language.php?edition_id=${edition}&lang=name_en`, 'name_en', 'language_id', null, null)
         const arch     = await fetchApiResultAndRequestDecision('ISO File Name (Architecture)', `https://tb.rg-adguard.net/php/get_arch.php?language_id=${language}`, 'name', 'arch_id', null, null)
