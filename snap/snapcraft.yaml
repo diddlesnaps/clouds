@@ -65,7 +65,7 @@ apps:
 parts:
   npm-deps:
     plugin: dump
-    source: https://nodejs.org/dist/v16.17.0/node-v16.17.0-linux-x64.tar.xz
+    source: https://nodejs.org/dist/v16.18.0/node-v16.18.0-linux-x64.tar.xz
     stage:
       - -include
       - -share
