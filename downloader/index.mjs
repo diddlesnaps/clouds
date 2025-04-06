@@ -6,7 +6,8 @@ import { randomUUID } from 'crypto';
 
 (async function() {
     try {
-        let session_id = randomUUID()
+        const locale = Intl.DateTimeFormat().resolvedOptions().locale
+        const session_id = randomUUID()
 
         let edition = await new Promise((resolve, reject) => {
             exec(`yad --entry --center --title='Choose Windows edition' --entry-label="Edition" "Windows 10" "Windows 11"`, (error, stdout, stderr) => {
@@ -28,18 +29,17 @@ import { randomUUID } from 'crypto';
         let res = await fetch(url)
         let body = await res.text()
 
-        body.match(/<option value="([0-9]+)">Windows/i)
-        const product_id = RegExp.$1
+        const product_id = body.match(/<option value="([0-9]+)">Windows/i)[1]
 
         await fetch(`https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=${session_id}`)
 
         const profile = '606624d44113'
 
-        const locale = Intl.DateTimeFormat().resolvedOptions().locale
         res = await fetch(`https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_id}&SKU=undefined&friendlyFileName=undefined&Locale=${locale}&sessionID=${session_id}`)
-        const step1_json = JSON.parse(await res.text())
+        body = await res.text()
+        const step1_json = JSON.parse(body)
         const languages = step1_json.Skus
-        
+
         const chosenLang = await new Promise((resolve, reject) => {
             exec(`yad --entry --center --title='Choose language' --entry-label=Language ${languages.map(l => `"${l.LocalizedLanguage}"`).join(' ')}`, (error, stdout, stderr) => {
                 if (error) {
@@ -51,14 +51,12 @@ import { randomUUID } from 'crypto';
         })
         const chosenLangObj = languages.find(l => l.LocalizedLanguage === chosenLang)
 
-        // 6e2a1789-ef16-4f27-a296-74ef7ef5d96b
-        res = await fetch(`https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${chosenLangObj.Id}&friendlyFileName=undefined&Locale=${locale}&sessionID=${session_id}`,
+        res = await fetch(`https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${chosenLangObj.Id}&friendlyFileName=undefined&Locale=en-US&sessionID=${session_id}`,
             {
                 referrer: url
             }
         )
         body = JSON.parse(await res.text())
-        console.dir(body)
 
         const [download] = body.ProductDownloadOptions
         console.log(download.Uri)
