@@ -2,15 +2,11 @@
 
 import { exec } from 'child_process';
 import fetch from 'node-fetch'
+import { randomUUID } from 'crypto';
 
 (async function() {
     try {
-        let now = (new Date).getTime()
-        let session_id = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (t) => {
-            let i = (now + Math.random() * 16) % 16 | 0;
-            return now = Math.floor(now / 16),
-            (t == 'x' ? i : i & 3 | 8).toString(16)
-        })
+        let session_id = randomUUID()
 
         let edition = await new Promise((resolve, reject) => {
             exec(`yad --entry --center --title='Choose Windows edition' --entry-label="Edition" "Windows 10" "Windows 11"`, (error, stdout, stderr) => {
@@ -27,25 +23,25 @@ import fetch from 'node-fetch'
             sku = 'windows10ISO'
         }
 
-        let res = await fetch(`https://www.microsoft.com/en-us/software-download/${sku}`)
+        const url = `https://www.microsoft.com/en-us/software-download/${sku}`
+
+        let res = await fetch(url)
         let body = await res.text()
 
-        body.match(/<div[^>]*id=(['"])SoftwareDownload_LanguageSelectionByProductEdition\1 [^>]*data-defaultPageId=(['"])([a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12})\2[^>]*>.*<div[^>]*id=(['"])SoftwareDownload_DownloadLinks\5 [^>]*data-defaultPageId=(['"])([a-f0-9]{8}-([a-f0-9]{4}-){3}[a-f0-9]{12})\6/i)
-        const step1_uuid = RegExp.$3
-        const step2_uuid = RegExp.$7
-        body.match(/<select[^>]*id=(['"])product-edition\1[^>]*><option value="" selected="selected">[^<]*<\/option>(?:(?:<!--)?<?optgroup[^>]*>?(?:-->)?)<option value=(['"])(\d+)\2[^>]*>/i)
-        const product_id = RegExp.$3
+        body.match(/<option value="([0-9]+)">Windows/i)
+        const product_id = RegExp.$1
 
-        res = await fetch(`https://www.microsoft.com/en-us/api/controls/contentinclude/html?pageId=${step1_uuid}&host=www.microsoft.com&segments=software-download%2c${sku}&query=&action=getskuinformationbyproductedition&sessionId=${session_id}&productEditionId=${product_id}&sdVersion=2`)
-        let step1_text = await res.text()
+        await fetch(`https://vlscppe.microsoft.com/tags?org_id=y6jn8c31&session_id=${session_id}`)
 
-        let languages = [...step1_text.matchAll(/<option value=['"]([^"']+)['"]>([^<])+<\/option>/g)]
-        languages = languages
-            .map(language => language[1].replace(/&quot;/g, '"'))
-            .map(JSON.parse)
+        const profile = '606624d44113'
+
+        const locale = Intl.DateTimeFormat().resolvedOptions().locale
+        res = await fetch(`https://www.microsoft.com/software-download-connector/api/getskuinformationbyproductedition?profile=${profile}&ProductEditionId=${product_id}&SKU=undefined&friendlyFileName=undefined&Locale=${locale}&sessionID=${session_id}`)
+        const step1_json = JSON.parse(await res.text())
+        const languages = step1_json.Skus
         
-        let language = await new Promise((resolve, reject) => {
-            exec(`yad --entry --center --title='Choose language' --entry-label=Language ${languages.map(lang => `"${lang.language}"`).join(' ')}`, (error, stdout, stderr) => {
+        const chosenLang = await new Promise((resolve, reject) => {
+            exec(`yad --entry --center --title='Choose language' --entry-label=Language ${languages.map(l => `"${l.LocalizedLanguage}"`).join(' ')}`, (error, stdout, stderr) => {
                 if (error) {
                     reject('Cancelled the operation')
                 } else {
@@ -53,17 +49,19 @@ import fetch from 'node-fetch'
                 }
             })
         })
-        language = languages.find(el => el.language === language)
+        const chosenLangObj = languages.find(l => l.LocalizedLanguage === chosenLang)
 
-        res = await fetch(`https://www.microsoft.com/en-us/api/controls/contentinclude/html?pageId=${step2_uuid}&host=www.microsoft.com&segments=software-download%2cwindows11&query=&action=GetProductDownloadLinksBySku&sessionId=${session_id}&skuId=${language.id}&language=${encodeURIComponent(language.language)}&sdVersion=2`)
-        body = await res.text()
+        // 6e2a1789-ef16-4f27-a296-74ef7ef5d96b
+        res = await fetch(`https://www.microsoft.com/software-download-connector/api/GetProductDownloadLinksBySku?profile=${profile}&productEditionId=undefined&SKU=${chosenLangObj.Id}&friendlyFileName=undefined&Locale=${locale}&sessionID=${session_id}`,
+            {
+                referrer: url
+            }
+        )
+        body = JSON.parse(await res.text())
+        console.dir(body)
 
-        let download = [...body.matchAll(/<input type="hidden" class="product-download-hidden" value="([^"]+)"/g)]
-            .map(download => download[1].replace(/&quot;/g, `"`).replace(/(IsoX86|IsoX64)/g, `"$1"`))
-            .map(JSON.parse)
-            .find(download => download.DownloadType === 'IsoX64')
-
-        console.log(download.Uri.replace(/&amp;/g, '&'))
+        const [download] = body.ProductDownloadOptions
+        console.log(download.Uri)
         process.exitCode = 0
     } catch (e) {
         console.error(e)
